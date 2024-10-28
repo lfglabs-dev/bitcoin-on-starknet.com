@@ -1,22 +1,24 @@
-# Nextra Docs Template 
+# Bitcoin on Starknet Documentation
 
-This is a template for creating documentation with [Nextra](https://nextra.site).
+A comprehensive documentation designed to support developers working with Bitcoin and Starknet integrations.
 
-[**Live Demo →**](https://nextra-docs-template.vercel.app)
-
-[![](.github/screenshot.png)](https://nextra-docs-template.vercel.app)
+[**Live Documentation →**](https://bitcoin-on-starknet.com)
 
 ## Quick Start
-
-Click the button to clone this repository and deploy it on Vercel:
-
-[![](https://vercel.com/button)](https://vercel.com/new/clone?s=https%3A%2F%2Fgithub.com%2Fshuding%2Fnextra-docs-template&showOptionalTeamCreation=false)
-
-## Local Development
 
 First, run `pnpm i` to install the dependencies.
 
 Then, run `pnpm dev` to start the development server and visit localhost:3000.
+
+## Contributing
+
+We welcome contributions! If you'd like to improve the documentation:
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-content`)
+3. Commit your changes (`git commit -m 'Add some amazing content'`)
+4. Push to the branch (`git push origin feature/amazing-content`)
+5. Open a Pull Request
 
 ## License
 
