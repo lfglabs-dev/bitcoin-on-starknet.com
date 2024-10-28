@@ -1,0 +1,24 @@
+# Verifying Bitcoin Transactions on Starknet
+
+## Overview
+
+Verifying Bitcoin transactions on Starknet involves proving that a specific transaction is included in a Bitcoin block that's part of the canonical chain. This process uses Merkle proofs to demonstrate transaction inclusion without requiring the full block data.
+
+## Prerequisites
+
+- The transaction ID (txid) you want to verify
+- The block header hash containing your transaction
+- A Merkle proof for the transaction
+
+## Understanding the Process
+
+The verification process consists of three main steps:
+
+1. **Confirm Block Header**: Verify that the block containing your transaction is part of Bitcoin's canonical chain on Starknet.
+2. **Validate Merkle Proof**: Use the transaction's Merkle proof to verify its inclusion in the block.
+3. **Parse Transaction Data**: Extract and verify the transaction details.
+
+## Code Example
+
+Here's how to verify a Bitcoin transaction using the Utu Relayer:
+
