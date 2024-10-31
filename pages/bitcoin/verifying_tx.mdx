@@ -2,7 +2,7 @@
 
 ## Overview
 
-In this tutorial, we'll build a "BitcoinDepositor" contract where a user can become the official depositor by being the first to send 1 BTC or more to a specific Bitcoin address. We'll learn how to verify these Bitcoin transactions on Starknet using the [Utu Relayer Contract](https://github.com/lfglabs-dev/utu_example).
+In this tutorial, we'll build a "BitcoinDepositor" contract where a user can become the official depositor by being the first to send 1 BTC or more to a specific Bitcoin address: `1LgXWxpELt2o9hPGiwqDT1B5Z7994MQPTN`. We'll learn how to verify these Bitcoin transactions on Starknet using the [Utu Relayer Contract](https://github.com/lfglabs-dev/utu_example).
 
 > The complete code for this tutorial is available in the [UTU example repository](https://github.com/lfglabs-dev/utu_example), which uses [Raito](https://github.com/keep-starknet-strange/raito) for Bitcoin transaction verification.
 
@@ -102,4 +102,29 @@ Here's how to generate the transaction proof data using TypeScript:
 ```typescript
 todo
 ```
+
+## Testing with Actual Data
+
+You can test the contract using this real Bitcoin transaction that sent 1.00043947 BTC to our target address:
+
+**Transaction Details:**
+- TXID: `fa89c32152bf324cd1d47d48187f977c7e0f380f6f78132c187ce27923f62fcc`
+- Block Height: 868239
+- Block Hash: `00000000000000000001060b021606cca1bd2c9b4eb15b6a31d2d76bf7f485fd`
+- Amount: 1.00043947 BTC (100,043,947 satoshis)
+- Recipient: `1LgXWxpELt2o9hPGiwqDT1B5Z7994MQPTN`
+- Block Time: 1730373503 (March 30, 2024)
+
+The transaction can be viewed on any Bitcoin block explorer:
+```
+https://blockstream.info/tx/fa89c32152bf324cd1d47d48187f977c7e0f380f6f78132c187ce27923f62fcc
+```
+
+This transaction meets all our requirements:
+1. ✅ Sends more than 1 BTC
+2. ✅ Sends to the correct address
+3. ✅ Is included in a valid Bitcoin block
+4. ✅ Is part of the canonical chain
+
+You can use this transaction data to test your implementation of the BitcoinDepositor contract.
 
