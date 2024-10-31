@@ -1,24 +1,153 @@
-# Verifying Bitcoin Transactions on Starknet
+# Verifying Bitcoin Transactions on Starknet: BitcoinDepositor Tutorial
 
 ## Overview
 
-Verifying Bitcoin transactions on Starknet involves proving that a specific transaction is included in a Bitcoin block that's part of the canonical chain. This process uses Merkle proofs to demonstrate transaction inclusion without requiring the full block data.
+In this tutorial, we'll build a "BitcoinDepositor" contract where a user can become the official depositor by being the first to send 1 BTC or more to a specific Bitcoin address. We'll learn how to verify these Bitcoin transactions on Starknet using the [Utu Relayer Contract](https://github.com/lfglabs-dev/utu_example).
 
-## Prerequisites
+> The complete code for this tutorial is available in the [UTU example repository](https://github.com/lfglabs-dev/utu_example), which uses [Raito](https://github.com/keep-starknet-strange/raito) for Bitcoin transaction verification.
 
-- The transaction ID (txid) you want to verify
-- The block header hash containing your transaction
-- A Merkle proof for the transaction
+## Contract Implementation
 
-## Understanding the Process
+### Contract Interface
 
-The verification process consists of three main steps:
+```rust
+#[starknet::interface]
+pub trait IBitcoinDepositor<TContractState> {
+    fn prove_deposit(
+        ref self: TContractState,
+        deposit_tx: Transaction,
+        output_id: usize,
+        block_height: u64,
+        block_header: BlockHeader,
+        tx_inclusion: Array<(Digest, bool)>
+    );
+    fn get_depositor(self: @TContractState) -> ContractAddress;
+}
+```
 
-1. **Confirm Block Header**: Verify that the block containing your transaction is part of Bitcoin's canonical chain on Starknet.
-2. **Validate Merkle Proof**: Use the transaction's Merkle proof to verify its inclusion in the block.
-3. **Parse Transaction Data**: Extract and verify the transaction details.
+### Storage
 
-## Code Example
+```rust
+#[storage]
+struct Storage {
+    depositor: ContractAddress,
+    utu_address: ContractAddress,
+}
+```
 
-Here's how to verify a Bitcoin transaction using the Utu Relayer:
+### Core Verification Logic
+
+When verifying Bitcoin transactions on Starknet, several crucial checks need to be performed:
+1. Verify the transaction contains the correct output (amount and recipient)
+2. Prove the transaction is included in a Bitcoin block (Merkle proof)
+3. Ensure the block is part of the canonical chain
+4. (Recommended) Add security checks for block maturity and cumulative work
+
+The following implementation shows the basic verification, but for production use, you should add additional security measures:
+
+```rust
+#[external(v0)]
+impl BitcoinDepositor of IBitcoinDepositor<ContractState> {
+    fn prove_deposit(
+        ref self: ContractState,
+        deposit_tx: Transaction,
+        output_id: usize,
+        block_height: u64,
+        block_header: BlockHeader,
+        tx_inclusion: Array<(Digest, bool)>
+    ) {
+        // Check no previous depositor
+        assert(self.depositor.read() == Zero::zero(), 'too late, someone deposited');
+        
+        // 1. Verify amount and recipient
+        let output_to_check = deposit_tx.outputs[output_id];
+        assert(*output_to_check.value > 100_000_000_u64, 'you sent less than 1 BTC');
+        let target = extract_p2pkh_target(*output_to_check.pk_script);
+        assert(target == "1LgXWxpELt2o9hPGiwqDT1B5Z7994MQPTN", 'wrong receiver');
+
+        // 2. Verify transaction inclusion in block
+        let tx_bytes_legacy = @deposit_tx.encode();
+        let txid = double_sha256_byte_array(tx_bytes_legacy);
+        let merkle_root = compute_merkle_root(txid, tx_inclusion);
+        assert(
+            block_header.merkle_root_hash.value == merkle_root.value, 
+            'invalid inclusion proof'
+        );
+
+        // 3. Verify block is in canonical chain
+        let utu = IUtuRelayDispatcher { contract_address: self.utu_address.read() };
+        let canonical_block_digest = utu.get_block(block_height);
+        assert(canonical_block_digest == block_header.hash(), 'invalid block digest');
+
+        // TODO: Add recommended security checks:
+        // - Ensure block is mature enough (e.g., 6+ confirmations)
+        // - Verify cumulative proof of work meets threshold
+        // - Check block timestamp is within acceptable range
+        // - Consider implementing transaction output spending verification
+
+        // Set depositor
+        self.depositor.write(get_caller_address());
+    }
+
+    fn get_depositor(self: @ContractState) -> ContractAddress {
+        self.depositor.read()
+    }
+}
+```
+
+## Generating Proof Data with TypeScript
+
+Here's how to generate the transaction proof data using TypeScript:
+
+```typescript
+import { BitcoinRPC, MerkleProof, BlockHeader } from '@bitcoin/core';
+import { starknet } from 'starknet';
+
+async function generateDepositProof(
+  txid: string,
+  blockHeight: number,
+  rpcUrl: string
+) {
+  const bitcoin = new BitcoinRPC(rpcUrl);
+  
+  // Get block and transaction data
+  const block = await bitcoin.getBlock(blockHeight);
+  const tx = await bitcoin.getTransaction(txid);
+  
+  // Generate Merkle proof
+  const merkleProof = await MerkleProof.generate(block, txid);
+  
+  // Format block header for contract
+  const header: BlockHeader = {
+    version: block.version,
+    prevBlockHash: block.previousblockhash,
+    merkleRoot: block.merkleroot,
+    timestamp: block.time,
+    bits: block.bits,
+    nonce: block.nonce
+  };
+
+  // Call contract
+  const contract = new starknet.Contract(ABI, CONTRACT_ADDRESS);
+  await contract.prove_deposit(
+    tx.hex,
+    0, // output_id for the target address
+    blockHeight,
+    header,
+    merkleProof.path
+  );
+}
+```
+
+## Testing
+
+For testing the contract, we recommend using [Starknet Foundry](https://github.com/foundry-rs/starknet-foundry). Check the [example repository](https://github.com/lfglabs-dev/utu_example) for complete test cases.
+
+## Next Steps
+
+1. Deploy the contract with a valid UTU Relay address
+2. Send 1+ BTC to the specified Bitcoin address
+3. Generate proof data using the TypeScript helper
+4. Call `prove_deposit` with the proof data
+5. If successful, you become the official depositor
 
