@@ -45,7 +45,7 @@ When verifying Bitcoin transactions on Starknet, several crucial checks need to 
 
 The following implementation shows the basic verification, but for production use, you should add additional security measures:
 
-```rust
+```cairo
 #[external(v0)]
 impl BitcoinDepositor of IBitcoinDepositor<ContractState> {
     fn prove_deposit(
@@ -100,54 +100,6 @@ impl BitcoinDepositor of IBitcoinDepositor<ContractState> {
 Here's how to generate the transaction proof data using TypeScript:
 
 ```typescript
-import { BitcoinRPC, MerkleProof, BlockHeader } from '@bitcoin/core';
-import { starknet } from 'starknet';
-
-async function generateDepositProof(
-  txid: string,
-  blockHeight: number,
-  rpcUrl: string
-) {
-  const bitcoin = new BitcoinRPC(rpcUrl);
-  
-  // Get block and transaction data
-  const block = await bitcoin.getBlock(blockHeight);
-  const tx = await bitcoin.getTransaction(txid);
-  
-  // Generate Merkle proof
-  const merkleProof = await MerkleProof.generate(block, txid);
-  
-  // Format block header for contract
-  const header: BlockHeader = {
-    version: block.version,
-    prevBlockHash: block.previousblockhash,
-    merkleRoot: block.merkleroot,
-    timestamp: block.time,
-    bits: block.bits,
-    nonce: block.nonce
-  };
-
-  // Call contract
-  const contract = new starknet.Contract(ABI, CONTRACT_ADDRESS);
-  await contract.prove_deposit(
-    tx.hex,
-    0, // output_id for the target address
-    blockHeight,
-    header,
-    merkleProof.path
-  );
-}
+todo
 ```
-
-## Testing
-
-For testing the contract, we recommend using [Starknet Foundry](https://github.com/foundry-rs/starknet-foundry). Check the [example repository](https://github.com/lfglabs-dev/utu_example) for complete test cases.
-
-## Next Steps
-
-1. Deploy the contract with a valid UTU Relay address
-2. Send 1+ BTC to the specified Bitcoin address
-3. Generate proof data using the TypeScript helper
-4. Call `prove_deposit` with the proof data
-5. If successful, you become the official depositor
 
