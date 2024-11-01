@@ -74,16 +74,14 @@ impl BitcoinDepositor of IBitcoinDepositor<ContractState> {
             'invalid inclusion proof'
         );
 
-        // 3. Verify block is in canonical chain
+        // 3. Verify block is in canonical chain and has sufficient proof of work
         let utu = IUtuRelayDispatcher { contract_address: self.utu_address.read() };
-        let canonical_block_digest = utu.get_block(block_height);
-        assert(canonical_block_digest == block_header.hash(), 'invalid block digest');
+        // Require 100 sextillion expected hashes (strong security)
+        utu.assert_safe(block_height, block_header.hash(), 100_000_000_000_000_000_000_000, 0);
 
-        // TODO: Add recommended security checks:
-        // - Ensure block is mature enough (e.g., 6+ confirmations)
-        // - Verify cumulative proof of work meets threshold
-        // - Check block timestamp is within acceptable range
-        // - Consider implementing transaction output spending verification
+        // 4. Verify block timestamp is not from the future
+        let block_time = u32_byte_reverse(block_header.time).into();
+        assert(block_time <= get_block_timestamp(), 'Block comes from the future');
 
         // Set depositor
         self.depositor.write(get_caller_address());
