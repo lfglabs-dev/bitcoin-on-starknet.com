@@ -1,19 +1,27 @@
 # Software Development Kits
 
-To interact with Bitcoin data on Starknet, you'll need two components:
+To interact with Bitcoin data on Starknet, you'll need three components:
 1. An SDK to generate the necessary proofs from Bitcoin Core.
-2. The Cairo library to verify these proofs and provide the Bitcoin data to your smart contracts
-
-## Cairo Library
-
-Our Cairo library abstracts away the complexity of proof verification, allowing you to focus on using Bitcoin data in your Starknet smart contracts. Once proofs are generated and submitted using an SDK, you can use the library's high-level functions to access verified Bitcoin data structures.
-
-You can find the library on GitHub at TODO
+2. A Cairo library to interpret the Bitcoin data to your smart contracts
+3. A relayer service to verify the integrity of the Bitcoin data
 
 ## TypeScript/JavaScript SDK
-
 
 You can install the TypeScript/JavaScript SDK from npm:
 ```bash
 npm install bitcoin-on-starknet
 ```
+
+## Cairo Library
+
+To work with Bitcoin data structures in your Starknet smart contracts, you can use Raito, a Bitcoin light client developed by the Starkware exploration team. Raito provides Bitcoin data structures in Cairo, allowing you to focus on using Bitcoin data in your smart contracts.
+
+You can find the library on GitHub at [Raito](https://github.com/keep-starknet-strange/raito/)
+
+## Relayer Service
+
+The relayer service is responsible for verifying the integrity of Bitcoin data on Starknet. You can find the implementation at [Utu Relay](https://github.com/lfglabs-dev/utu_relay).
+
+The relayer is deployed at the following addresses:
+- Mainnet: `0x04d3c95735a74aafd9092705943b0602f100d77f2ce872ffd4962c4924e6d145`
+- Sepolia: `0x04d3c95735a74aafd9092705943b0602f100d77f2ce872ffd4962c4924e6d145`

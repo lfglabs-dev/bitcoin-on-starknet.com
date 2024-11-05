@@ -2,9 +2,6 @@
   "index": "Introduction",
   "sdk": "SDK",
   "bitcoin": "Bitcoin Integration",
-  "runes": "🚧 Runes Integration",
-  "ordinals": "🚧 Ordinals Integration",
-  "taro": "🚧 Taro Integration",
   "contact": {
     "title": "Contact ↗",
     "type": "page",
