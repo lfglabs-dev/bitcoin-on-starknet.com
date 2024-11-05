@@ -93,15 +93,7 @@ impl BitcoinDepositor of IBitcoinDepositor<ContractState> {
 }
 ```
 
-## Generating Proof Data with TypeScript
-
-Here's how to generate the transaction proof data using TypeScript:
-
-```typescript
-todo
-```
-
-## Testing with Actual Data
+## Providing Bitcoin data
 
 You can test the contract using this real Bitcoin transaction that sent 1.00043947 BTC to our target address:
 
@@ -124,5 +116,77 @@ This transaction meets all our requirements:
 3. ✅ Is included in a valid Bitcoin block
 4. ✅ Is part of the canonical chain
 
-You can use this transaction data to test your implementation of the BitcoinDepositor contract.
+### Generating the Proof with TypeScript
+
+Let's use the [bitcoin-on-starknet.js](https://github.com/lfglabs-dev/bitcoin-on-starknet.js) library to generate and submit the proof for our transaction. Here's how to do it:
+
+```typescript
+import {
+  BitcoinProxiedRpcProvider,
+  UtuProvider,
+  serializedHash,
+} from "bitcoin-on-starknet";
+import { Account, RpcProvider, TransactionType, Invocations } from "starknet";
+
+// Pre-formatted transaction data for Starknet processing
+const EXAMPLE_SERIALIZED_TRANSACTION = [
+  2n, 0n, 1n, 4n,
+  // ... transaction details ...
+  744843869111954496999033090920949585736336206836849668294828n,
+  25n, 0n, 0n,
+] as const;
+
+async function main() {
+  // Initialize providers
+  const bitcoinProvider = new BitcoinProxiedRpcProvider("https://btcrpc.lfg.rs/rpc");
+  const utuProvider = new UtuProvider(bitcoinProvider);
+  const starknetProvider = new RpcProvider({
+    nodeUrl: "https://sepolia.rpc.starknet.id",
+  });
+
+  // Initialize Starknet account
+  const account = new Account(
+    starknetProvider,
+    process.env.STARKNET_ADDRESS as string,
+    process.env.STARKNET_PRIVATE_KEY as string
+  );
+
+  try {
+    // Fetch transaction and generate proof
+    const txId = "fa89c32152bf324cd1d47d48187f977c7e0f380f6f78132c187ce27923f62fcc";
+    const rawTransaction = await bitcoinProvider.getRawTransaction(txId, true);
+    const header = await bitcoinProvider.getBlockHeader(rawTransaction.blockhash);
+    
+    // Generate sync transactions and Merkle proof
+    const syncTransactions = await utuProvider.getSyncTxs(
+      starknetProvider,
+      header.height,
+      0n
+    );
+    const txInclusionProof = await utuProvider.getTxInclusionProof(txId);
+
+    // Prepare calldata for prove_deposit
+    let calldata = EXAMPLE_SERIALIZED_TRANSACTION.map(n => "0x" + n.toString(16));
+    calldata.push("0x0"); // output_id
+    calldata.push("0x" + header.height.toString(16));
+    calldata.push(...utuProvider.serializeBlockHeader(header));
+    
+    // Add Merkle proof
+    calldata.push(txInclusionProof.length);
+    txInclusionProof.forEach(([hash, direction]: [string, boolean]) => {
+      calldata.push(...serializedHash(hash));
+      calldata.push(direction ? "0x1" : "0x0");
+    });
+
+    // Send a multicall syncing the chain before interacting with our contract
+    await account.execute([...syncTransactions, proveDepositCall]);
+  } catch (error) {
+    console.error("Error:", error);
+  }
+}
+
+main();
+```
+
+You can find the complete code example, including transaction simulation, in the [bitcoin-on-starknet.js repository](https://github.com/lfglabs-dev/bitcoin-on-starknet.js/blob/master/example/index.ts#L49).
 
