@@ -2,7 +2,7 @@
 
 ## Overview
 
-In this tutorial, we'll build a "BitcoinDepositor" contract where a user can become the official depositor by being the first to send 1 BTC or more to a specific Bitcoin address: `1LgXWxpELt2o9hPGiwqDT1B5Z7994MQPTN`. We'll learn how to verify these Bitcoin transactions on Starknet using the [Utu Relayer Contract](https://github.com/lfglabs-dev/utu_example).
+In this tutorial, we'll build a "BitcoinDepositor" contract where a user can become the official depositor by being the first to send 1 BTC or more to a specific Bitcoin address: `1LgXWxpELt2o9hPGiwqDT1B5Z7994MQPTN`. We'll learn how to verify these Bitcoin transactions on Starknet using the [Utu Relayer Contract](https://github.com/lfglabs-dev/utu_relay).
 
 > The complete code for this tutorial is available in the [UTU example repository](https://github.com/lfglabs-dev/utu_example), which uses [Raito](https://github.com/keep-starknet-strange/raito) for Bitcoin transaction verification.
 
@@ -76,7 +76,7 @@ impl BitcoinDepositor of IBitcoinDepositor<ContractState> {
 
         // 3. Verify block is in canonical chain and has sufficient proof of work
         let utu = IUtuRelayDispatcher { contract_address: self.utu_address.read() };
-        // Require 100 sextillion expected hashes (strong security)
+        // Requires 100 sextillion (10^36) expected hashes (strong security)
         utu.assert_safe(block_height, block_header.hash(), 100_000_000_000_000_000_000_000, 0);
 
         // 4. Verify block timestamp is not from the future
@@ -105,10 +105,7 @@ You can test the contract using this real Bitcoin transaction that sent 1.000439
 - Recipient: `1LgXWxpELt2o9hPGiwqDT1B5Z7994MQPTN`
 - Block Time: 1730373503 (March 30, 2024)
 
-The transaction can be viewed on any Bitcoin block explorer:
-```
-https://blockstream.info/tx/fa89c32152bf324cd1d47d48187f977c7e0f380f6f78132c187ce27923f62fcc
-```
+The transaction [can be viewed on any Bitcoin block explorer](https://blockstream.info/tx/fa89c32152bf324cd1d47d48187f977c7e0f380f6f78132c187ce27923f62fcc)
 
 This transaction meets all our requirements:
 1. ✅ Sends more than 1 BTC

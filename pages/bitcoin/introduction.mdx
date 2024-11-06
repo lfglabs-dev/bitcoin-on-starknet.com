@@ -2,9 +2,7 @@
 
 ## Understanding the Integration
 
-This integration enables developers to build applications that leverage Bitcoin's network effects while benefiting from Starknet's programmability and low transaction costs.
-
-The integration works by maintaining a verified state of Bitcoin's blockchain within Starknet's ecosystem, allowing for trustless verification of Bitcoin transactions and state.
+Bitcoin on Starknet allows Starknet smart contracts to directly verify Bitcoin transactions and state. Developers can build applications that combine Bitcoin's security and network effect with Starknet's programmability and lower fees, without requiring trust in third parties.
 
 ## The Utu Relayer: Bridging Two Worlds
 
@@ -13,6 +11,27 @@ Named after the ancient Sumerian sun god who watched over all earthly events, th
 1. **Block Header Verification**: This allows anyone to register Bitcoin block headers on Starknet, verifying and storing the proof-of-work required to mine each block. This ensures that only valid blocks that required significant computational work are accepted.
 
 2. **Canonical Chain Maintenance**: This maps block heights to their corresponding block headers on Starknet, verified using the coinbase transaction. It ensures the strongest proof-of-work chain is maintained, keeping the state coherent with Bitcoin's canonical chain.
+
+```mermaid
+graph LR
+    subgraph Bitcoin Network
+        BTC[Bitcoin Blocks]
+    end
+    
+    subgraph Starknet Network
+        UR[UTU Relayer]
+        DApp[Your Smart Contract]
+    end
+    
+    BTC -->|Block Headers| UR
+    UR -->|1. Verify PoW<br>2. Maintain Canonical Chain| UR
+    UR -->|Verified Bitcoin State| DApp
+    
+    style BTC fill:#f7931a,stroke:#000,stroke-width:2px,color:#fff
+    style UR fill:#00ff00,stroke:#000,stroke-width:2px,color:#fff
+    style DApp fill:#1c1c1c,stroke:#000,stroke-width:2px,color:#fff
+```
+
 
 This infrastructure enables developers to verify that a bitcoin block header is indeed part of the canonical chain, allowing them to read all information natively included in the block header (like timestamp or difficulty) but also to verify additional data like specific Bitcoin transactions by checking their inclusion proofs against the block's merkle root. To learn more about verifying Bitcoin transactions, please visit the [verifying a transaction page](./verifying_tx).
 
