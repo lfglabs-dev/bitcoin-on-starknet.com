@@ -9,7 +9,7 @@ const config: DocsThemeConfig = {
     link: "https://github.com/lfglabs-dev/bitcoin-on-starknet.js",
   },
   chat: {
-    link: "https://discord.com",
+    link: "https://t.me/+Xm1Zw8URs1VlODQx",
   },
   docsRepositoryBase: "https://github.com/lfglabs-dev/bitcoin-on-starknet.com",
   footer: {

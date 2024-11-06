@@ -1,9 +1,23 @@
 # Software Development Kits
 
 To interact with Bitcoin data on Starknet, you'll need three components:
-1. An SDK to generate the necessary proofs from Bitcoin Core.
-2. A Cairo library to interpret the Bitcoin data to your smart contracts
+1. An SDK to generate the necessary proofs from [Bitcoin Core](https://github.com/bitcoin/bitcoin?tab=readme-ov-file#what-is-bitcoin-core).
+2. A Cairo library to interpret the Bitcoin data in your smart contracts
 3. A relayer service to verify the integrity of the Bitcoin data
+
+```mermaid
+graph TD
+    BC[Bitcoin Core] --> |Block Headers| SDK[Javascript SDK]
+    SDK --> |Generate Proofs| SC[Smart Contract]
+    R[Raito Library] --> |Bitcoin Data Structures| SC
+    UR[UTU Relay] --> |Verify Data Integrity| SC
+    
+    style BC fill:#f7931a,stroke:#000,stroke-width:2px,color:#fff
+    style SDK fill:#3178c6,stroke:#000,stroke-width:2px,color:#fff
+    style SC fill:#1c1c1c,stroke:#000,stroke-width:2px,color:#fff
+    style R fill:#6f4e37,stroke:#000,stroke-width:2px,color:#fff
+    style UR fill:#00ff00,stroke:#000,stroke-width:2px,color:#fff
+```
 
 ## TypeScript/JavaScript SDK
 
@@ -23,5 +37,5 @@ You can find the library on GitHub at [Raito](https://github.com/keep-starknet-s
 The relayer service is responsible for verifying the integrity of Bitcoin data on Starknet. You can find the implementation at [Utu Relay](https://github.com/lfglabs-dev/utu_relay).
 
 The relayer is deployed at the following addresses:
-- Mainnet: `0x04d3c95735a74aafd9092705943b0602f100d77f2ce872ffd4962c4924e6d145`
-- Sepolia: `0x04d3c95735a74aafd9092705943b0602f100d77f2ce872ffd4962c4924e6d145`
+- Mainnet: [`0x064e21f88caa162294fdda7f73d67ad09b81419e97df3409a5eb13ba39b88c31`](https://voyager.online/contract/0x064e21f88caa162294fdda7f73d67ad09b81419e97df3409a5eb13ba39b88c31)
+- Sepolia: [`0x064e21f88caa162294fdda7f73d67ad09b81419e97df3409a5eb13ba39b88c31`](https://sepolia.voyager.online/contract/0x064e21f88caa162294fdda7f73d67ad09b81419e97df3409a5eb13ba39b88c31)
