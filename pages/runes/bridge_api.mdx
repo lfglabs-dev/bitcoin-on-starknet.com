@@ -47,10 +47,10 @@ Generates a unique Bitcoin deposit address for your Starknet wallet. This addres
 GET /get_deposits/bitcoin?bitcoin_addr={address}
 ```
 
-Retrieves all Runes deposits made to a specific Bitcoin address.
+Retrieves all Runes deposits made from a specific Bitcoin address (e.g., your Xverse wallet address).
 
 #### Parameters
-- `bitcoin_addr` (required): Bitcoin deposit address
+- `bitcoin_addr` (required): Bitcoin wallet address
 
 #### Response
 ```json
@@ -93,25 +93,35 @@ Same structure as the Bitcoin deposits endpoint.
 
 ### Get Claim Data
 ```http
-GET /claim_deposit_data/{txid}
+POST /claim_deposit_data
 ```
 
 Retrieves the data required to claim a specific deposit on Starknet.
 
+#### Request Body
+```json
+{
+    "starknet_addr": "0x123...",
+    "tx_id": "abcd1234...",
+    "tx_vout": 0  // optional
+}
+```
+
 #### Parameters
-- `txid` (required): Bitcoin transaction ID of the deposit
+- `starknet_addr` (required): Your Starknet wallet address
+- `tx_id` (required): Bitcoin transaction ID of the deposit
+- `tx_vout` (optional): The specific output index in the transaction
 
 #### Response
 ```json
 {
     "status": "success",
     "data": {
-        "rune_id": "0x123...",
-        "amount": ["0x456...", "0x789..."],
-        // Proof data required by the bridge contract
-        "target_addr": "0xabc...",
-        "tx_id": "abcd1234...",
-        "sig": {
+        "rune_id": "0x123...",  // FieldElement
+        "amount": ["0x456...", "0x789..."],  // Tuple of two FieldElements
+        "target_addr": "0xabc...",  // Starknet Address
+        "tx_id": "abcd1234...",  // Bitcoin transaction ID
+        "sig": {  // Signature
             "r": "0xdef...",
             "s": "0x012..."
         }
