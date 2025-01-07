@@ -1,0 +1,166 @@
+# Bridge API Documentation
+
+The Utu Runes Bridge API provides endpoints for managing Runes deposits and withdrawals between Bitcoin and Starknet. This documentation covers the available endpoints and their usage.
+
+## Base URL
+```
+https://api.utu.lfg.rs
+```
+
+## Response Format
+
+All API responses follow a consistent format:
+
+```json
+{
+    "status": "success | error_type",
+    "data": <response_data>
+}
+```
+
+Where:
+- `status`: Either "success" or an error type like "bad_request"
+- `data`: The response data, which can be a string, object, or array depending on the endpoint
+
+## Endpoints
+
+### Generate Deposit Address
+```http
+GET /get_bitcoin_deposit_addr?starknet_addr={address}
+```
+
+Generates a unique Bitcoin deposit address for your Starknet wallet. This address is deterministically generated and permanently linked to your Starknet address.
+
+#### Parameters
+- `starknet_addr` (required): Your Starknet wallet address
+
+#### Response
+```json
+{
+    "status": "success",
+    "data": "bc1p..."
+}
+```
+
+### Query Deposits by Bitcoin Address
+```http
+GET /get_deposits/bitcoin?bitcoin_addr={address}
+```
+
+Retrieves all Runes deposits made from a specific Bitcoin address (e.g., your Xverse wallet address).
+
+#### Parameters
+- `bitcoin_addr` (required): Bitcoin wallet address
+
+#### Response
+```json
+{
+    "status": "success",
+    "data": {
+        "pending": [
+            {
+                "txid": "...",
+                "block_height": 123456,
+                "block_hash": "...",
+                "timestamp": 1234567890,
+                "runes": [
+                    {
+                        "id": "...",
+                        "amount": "...",
+                        "claimed": false
+                    }
+                ]
+            }
+        ],
+        "confirmed": [...],
+        "claimed": [...]
+    }
+}
+```
+
+### Query Deposits by Starknet Address
+```http
+GET /get_deposits/starknet?starknet_addr={address}
+```
+
+Retrieves all Runes deposits associated with a Starknet address.
+
+#### Parameters
+- `starknet_addr` (required): Starknet wallet address
+
+#### Response
+Same structure as the Bitcoin deposits endpoint.
+
+### Get Claim Data
+```http
+POST /claim_deposit_data
+```
+
+Retrieves the data required to claim a specific deposit on Starknet.
+
+#### Request Body
+```json
+{
+    "starknet_addr": "0x123...",
+    "tx_id": "abcd1234...",
+    "tx_vout": 0  // optional
+}
+```
+
+#### Parameters
+- `starknet_addr` (required): Your Starknet wallet address
+- `tx_id` (required): Bitcoin transaction ID of the deposit
+- `tx_vout` (optional): The specific output index in the transaction
+
+#### Response
+```json
+{
+    "status": "success",
+    "data": {
+        "rune_id": "0x123...",  // FieldElement
+        "amount": ["0x456...", "0x789..."],  // Tuple of two FieldElements
+        "target_addr": "0xabc...",  // Starknet Address
+        "tx_id": "abcd1234...",  // Bitcoin transaction ID
+        "sig": {  // Signature
+            "r": "0xdef...",
+            "s": "0x012..."
+        }
+    }
+}
+```
+
+## Status Codes and Error Handling
+
+The API uses standard HTTP status codes along with the consistent response format:
+
+```json
+{
+    "status": "<status_type>",
+    "data": "<message>"
+}
+```
+
+Status types:
+- `success`: Request completed successfully (HTTP 200)
+- `error`: Generic error response
+- `unauthorized`: Authentication required or failed (HTTP 401)
+- `forbidden`: Permission denied (HTTP 403)
+- `not_found`: Requested resource doesn't exist (HTTP 404)
+- `bad_request`: Invalid parameters or request format (HTTP 400)
+- `internal_server_error`: Server-side error (HTTP 500)
+
+Example error response:
+```json
+{
+    "status": "internal_server_error",
+    "data": "Hiro API error: error sending request for url (...)"
+}
+```
+
+## Rate Limiting
+
+The API implements rate limiting to ensure fair usage. Please contact support if you need increased limits.
+
+## Security Considerations
+
+While this API manages bridge operations, it does not have custody of the deposited bitcoins. The actual funds are controlled by a federation through a separate multisig setup.
