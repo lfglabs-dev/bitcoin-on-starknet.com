@@ -16,12 +16,27 @@ flowchart TD
         SW[Starknet Wallet]
     end
 
+    subgraph Trusted Parties
+        OP[Operator]
+        DSM[Deposit Signers Member]
+        WSM[Withdrawals Signers Member]
+        FD[Fordefi]
+    end
+
     subgraph Core Services
+        subgraph Deposit Tools
+            DR[Deposit Request]
+            DSD[Deposit Signer/Dispatcher]
+        end
+        
+        subgraph Withdrawal Tools
+            WR[Withdrawals Request]
+            WS[Withdrawals Signer]
+            WD[Withdrawals Dispatcher]
+        end
+
         API[API Service]
-        AC[Auto Claim Service]
         IDX[Indexer]
-        WTX[Withdrawals TX]
-        WV[Withdrawals Verifier]
     end
 
     subgraph Smart Contracts
@@ -40,12 +55,28 @@ flowchart TD
     UI --> BW & SW
     UI --> API
     API --> DB
-    AC --> BC
+    BB --> DR
+    DR --> FD
+    FD --> DSD
+    DSD --> SB
+    SB --> WR
+    WR --> FD
+    WS --> FD
+    FD --> WD
+    WD --> BB
     IDX --> DB & SB
-    WTX --> BB
-    WV --> BB & SB
     BC --> ERC & SAG & RL & SB
     SAG --> ERC
+
+    %% Trusted Parties connections
+    OP --> API
+    OP --> IDX
+    OP --> DR
+    OP --> WR
+    OP --> DSD
+    OP --> WD
+    DSM --> DSD
+    WSM --> WS
 ```
 
 ## Key Features
@@ -65,8 +96,20 @@ flowchart TD
 
 - **Bridge Contract**: A Starknet smart contract that manages deposits, withdrawals, and ERC20 token minting/burning
 - **ERC20 Runes**: Starknet tokens that represent bridged Runes
-- **Auto Claim Service**: Automatically processes deposits and mints tokens on Starknet
-- **API Service**: Handles deposit address generation and transaction verification
+- **API Service**: Provides access to indexed data and generates deposit addresses
+- **Indexer**: Monitors the Starknet blockchain for relevant transactions and events
+- **Deposit Tools**:
+  - Deposit Request: Submits deposit transactions to Fordefi
+  - Deposit Signer/Dispatcher: Receives approval from Fordefi and submits deposit transactions to Starknet
+- **Withdrawal Tools**:
+  - Withdrawals Request: Submits withdrawal transactions to Fordefi
+  - Withdrawals Signer: Approves withdrawal transactions
+  - Withdrawals Dispatcher: Receives approval from Fordefi and submits withdrawals to Bitcoin
+- **Trusted Parties**:
+  - Operator: Manages and monitors core services including API, Indexer, request and sipatcher tools
+  - Deposit Signers Member: Authorized entity that interacts with the Deposit Signer
+  - Withdrawals Signers Member: Authorized entity that interacts with the Withdrawals Signer
+  - Fordefi: Trusted service that coordinates transaction approvals
 
 ## Getting Started
 
@@ -76,6 +119,6 @@ To begin using the Runes Bridge, you'll need:
 2. A Starknet wallet
 3. Runes you wish to bridge
 
-Visit the [bridge website](https://bridge.bitcoin-on-starknet.com) to start using the bridge.
+Note: The current bridge interface at [bridge.bitcoin-on-starknet.com](https://bridge.bitcoin-on-starknet.com) is temporary. The official Runes bridge will be integrated into StarkGate, which will be the primary interface for bridging Runes between Bitcoin and Starknet.
 
 For developers interested in integrating with the bridge, please refer to the [Bridge API documentation](./bridge_api).
